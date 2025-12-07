@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assets CDN Index</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --muted: #94a3b8;
+      --text: #e2e8f0;
+      --accent: #38bdf8;
+      --border: #1f2937;
+      --radius: 12px;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.08), transparent 35%), radial-gradient(circle at 80% 0%, rgba(52, 211, 153, 0.08), transparent 35%), var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      margin-bottom: 20px;
+    }
+    h1 {
+      margin: 0 0 6px;
+      letter-spacing: 0.5px;
+      font-size: 26px;
+    }
+    .subtitle {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    #filter {
+      flex: 1 1 260px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      outline: none;
+    }
+    #filter:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    }
+    #summary {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 150ms ease, border-color 150ms ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+    .thumb {
+      background: #0b1222;
+      min-height: 150px;
+      display: grid;
+      place-items: center;
+      padding: 8px;
+    }
+    .thumb img,
+    .thumb video {
+      max-width: 100%;
+      max-height: 220px;
+      border-radius: 8px;
+    }
+    .thumb span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .meta {
+      padding: 12px 12px 14px;
+      display: grid;
+      gap: 8px;
+    }
+    .path {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+      word-break: break-all;
+      color: #cbd5e1;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .open {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .open:hover {
+      text-decoration: underline;
+    }
+    .copy {
+      margin-left: auto;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .copy:hover {
+      background: rgba(56, 189, 248, 0.22);
+    }
+    @media (max-width: 640px) {
+      body {
+        padding: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>Assets CDN</h1>
+      <p class="subtitle">Browse every image/video in this repository and grab a direct link.</p>
+      <div class="controls">
+        <input id="filter" type="search" placeholder="Filter by file name or folder...">
+        <span id="summary"></span>
+      </div>
+    </header>
+
+    <section id="grid" class="grid"></section>
+  </main>
+
+  <template id="card-template">
+    <article class="card">
+      <div class="thumb"></div>
+      <div class="meta">
+        <div class="path"></div>
+        <div class="actions">
+          <a class="open" target="_blank" rel="noopener">Open file</a>
+          <button class="copy" type="button">Copy URL</button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script>
+    const assets = [
+      "uploads/2025/A-scaled.jpg",
+      "uploads/2025/B.jpg",
+      "uploads/2025/B.png",
+      "uploads/2025/top_img.png",
+      "uploads/2025/unsplash.jpg",
+      "uploads/3/Img_1.jpg",
+      "uploads/3/Img_10.jpg",
+      "uploads/3/Img_11.jpg",
+      "uploads/3/Img_12.jpg",
+      "uploads/3/Img_13.jpg",
+      "uploads/3/Img_14.jpg",
+      "uploads/3/Img_15.jpg",
+      "uploads/3/Img_16.jpg",
+      "uploads/3/Img_17.jpg",
+      "uploads/3/Img_18.jpg",
+      "uploads/3/Img_19.jpg",
+      "uploads/3/Img_2.jpg",
+      "uploads/3/Img_20.jpg",
+      "uploads/3/Img_21.jpg",
+      "uploads/3/Img_22.jpg",
+      "uploads/3/Img_3.jpg",
+      "uploads/3/Img_4.jpg",
+      "uploads/3/Img_5.jpg",
+      "uploads/3/Img_6.jpg",
+      "uploads/3/Img_7.jpg",
+      "uploads/3/Img_8.jpg",
+      "uploads/3/Img_9.jpg",
+      "uploads/4/Img_1.jpg",
+      "uploads/4/Img_10.jpg",
+      "uploads/4/Img_11.jpg",
+      "uploads/4/Img_12.jpg",
+      "uploads/4/Img_13.jpg",
+      "uploads/4/Img_14.jpg",
+      "uploads/4/Img_15.jpg",
+      "uploads/4/Img_16.jpg",
+      "uploads/4/Img_17.jpg",
+      "uploads/4/Img_18.jpg",
+      "uploads/4/Img_19.jpg",
+      "uploads/4/Img_2.jpg",
+      "uploads/4/Img_20.jpg",
+      "uploads/4/Img_3.jpg",
+      "uploads/4/Img_4.jpg",
+      "uploads/4/Img_5.jpg",
+      "uploads/4/Img_6.jpg",
+      "uploads/4/Img_7.jpg",
+      "uploads/4/Img_8.jpg",
+      "uploads/4/Img_9.jpg",
+      "uploads/6/Img_1.jpg",
+      "uploads/6/Img_10.jpg",
+      "uploads/6/Img_11.jpg",
+      "uploads/6/Img_12.jpg",
+      "uploads/6/Img_13.jpg",
+      "uploads/6/Img_14.jpg",
+      "uploads/6/Img_2.jpg",
+      "uploads/6/Img_3.jpg",
+      "uploads/6/Img_4.jpg",
+      "uploads/6/Img_5.jpg",
+      "uploads/6/Img_6.jpg",
+      "uploads/6/Img_7.jpg",
+      "uploads/6/Img_8.jpg",
+      "uploads/6/Img_9.jpg",
+      "uploads/7/Img_1.jpg",
+      "uploads/7/Img_10.jpg",
+      "uploads/7/Img_11.jpg",
+      "uploads/7/Img_12.jpg",
+      "uploads/7/Img_13.jpg",
+      "uploads/7/Img_14.jpg",
+      "uploads/7/Img_15.jpg",
+      "uploads/7/Img_2.jpg",
+      "uploads/7/Img_3.jpg",
+      "uploads/7/Img_4.jpg",
+      "uploads/7/Img_5.jpg",
+      "uploads/7/Img_6.jpg",
+      "uploads/7/Img_7.jpg",
+      "uploads/7/Img_8.jpg",
+      "uploads/7/Img_9.jpg",
+      "uploads/8/Img_1.jpg",
+      "uploads/8/Img_2.jpg",
+      "uploads/8/Img_3.jpg",
+      "uploads/8/Img_4.jpg",
+      "uploads/8/Img_5.jpg",
+      "uploads/8/Img_6.jpg",
+      "uploads/8/Img_7.jpg",
+      "uploads/8/Img_8.jpg",
+      "uploads/8/Img_9.jpg",
+      "uploads/9/Img_1.jpg",
+      "uploads/9/Img_10.jpg",
+      "uploads/9/Img_11.jpg",
+      "uploads/9/Img_12.jpg",
+      "uploads/9/Img_13.jpg",
+      "uploads/9/Img_14.jpg",
+      "uploads/9/Img_15.jpg",
+      "uploads/9/Img_16.jpg",
+      "uploads/9/Img_17.jpg",
+      "uploads/9/Img_18.jpg",
+      "uploads/9/Img_19.jpg",
+      "uploads/9/Img_2.jpg",
+      "uploads/9/Img_3.jpg",
+      "uploads/9/Img_4.jpg",
+      "uploads/9/Img_5.jpg",
+      "uploads/9/Img_6.jpg",
+      "uploads/9/Img_7.jpg",
+      "uploads/9/Img_8.jpg",
+      "uploads/9/Img_9.jpg"
+    ];
+
+    const grid = document.getElementById("grid");
+    const summary = document.getElementById("summary");
+    const filter = document.getElementById("filter");
+    const template = document.getElementById("card-template");
+    const videoExts = new Set(["mp4", "webm", "mov", "m4v", "ogg", "ogv"]);
+    const imageExts = new Set(["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"]);
+
+    function createCard(path) {
+      const node = template.content.firstElementChild.cloneNode(true);
+      const id = "asset-" + path.replace(/[^a-z0-9]/gi, "-").replace(/-+/g, "-");
+      node.id = id;
+
+      const pathEl = node.querySelector(".path");
+      pathEl.textContent = path;
+
+      const openLink = node.querySelector(".open");
+      openLink.href = path;
+      openLink.title = `Open ${path}`;
+
+      const copyBtn = node.querySelector(".copy");
+      copyBtn.addEventListener("click", async () => {
+        const url = new URL(path, window.location.href).href;
+        try {
+          await navigator.clipboard.writeText(url);
+          copyBtn.textContent = "Copied";
+        } catch (err) {
+          copyBtn.textContent = "Copy failed";
+        }
+        setTimeout(() => (copyBtn.textContent = "Copy URL"), 1100);
+      });
+
+      const thumb = node.querySelector(".thumb");
+      const ext = path.split(".").pop().toLowerCase();
+
+      if (imageExts.has(ext)) {
+        const img = document.createElement("img");
+        img.src = path;
+        img.alt = path;
+        img.loading = "lazy";
+        thumb.appendChild(img);
+      } else if (videoExts.has(ext)) {
+        const video = document.createElement("video");
+        video.src = path;
+        video.controls = true;
+        video.preload = "metadata";
+        thumb.appendChild(video);
+      } else {
+        const span = document.createElement("span");
+        span.textContent = "No preview";
+        thumb.appendChild(span);
+      }
+
+      return node;
+    }
+
+    function render(list) {
+      grid.innerHTML = "";
+      list.forEach((path) => {
+        grid.appendChild(createCard(path));
+      });
+      summary.textContent = `${list.length} of ${assets.length} assets shown`;
+    }
+
+    filter.addEventListener("input", (event) => {
+      const term = event.target.value.trim().toLowerCase();
+      if (!term) {
+        render(assets);
+        return;
+      }
+      const filtered = assets.filter((path) => path.toLowerCase().includes(term));
+      render(filtered);
+    });
+
+    render(assets);
+  </script>
+</body>
+</html>
